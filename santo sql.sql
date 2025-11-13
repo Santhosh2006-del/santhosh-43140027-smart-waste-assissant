@@ -1,0 +1,30 @@
+USE smartwaste;
+CREATE TABLE IF NOT EXISTS waste (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    type VARCHAR(255)
+);
+DESCRIBE waste;
+ALTER TABLE waste 
+ADD COLUMN category VARCHAR(255),
+ADD COLUMN method VARCHAR(255);
+SELECT * FROM waste;
+USE smartwaste;
+DESCRIBE waste;
+ALTER TABLE waste 
+ADD COLUMN IF NOT EXISTS category VARCHAR(255),
+ADD COLUMN IF NOT EXISTS method VARCHAR(255),
+ADD COLUMN IF NOT EXISTS weight VARCHAR(255);
+USE smartwaste;
+SELECT * FROM waste;
+DESCRIBE waste;
+SELECT * FROM waste;
+SELECT * FROM waste;
+
+
+
+
+
+
+
+
+
