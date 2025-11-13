@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Waste Segregation Assistant</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #e3f2fd;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 50px auto;
+      background: #f9fbff;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+      text-align: center;
+      color: #0d47a1;
+    }
+
+    input, button {
+      padding: 8px;
+      margin: 5px;
+      border-radius: 5px;
+      border: 1px solid #90caf9;
+    }
+
+    button {
+      background-color: #1565c0;
+      color: white;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #0d47a1;
+    }
+
+    .output-box {
+      border: 1px solid #64b5f6;
+      background: white;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      min-height: 40px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+
+    th, td {
+      border: 1px solid #64b5f6;
+      padding: 8px;
+      text-align: center;
+    }
+
+    th {
+      background-color: #bbdefb;
+    }
+
+    .add-section {
+      border: 1px solid #64b5f6;
+      padding: 15px;
+      border-radius: 8px;
+      background: #f1f8ff;
+    }
+
+    .add-section h3 {
+      color: #0d47a1;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Smart Waste Segregation Assistant</h1>
+
+    <div>
+      <label>Enter Waste Item:</label>
+      <input type="text" id="inputItem" placeholder="e.g., tube light">
+      <button onclick="searchItem()">Search</button>
+    </div>
+
+    <div id="output" class="output-box"></div>
+
+    <div class="add-section">
+      <h3>Add New Item</h3>
+      <input type="text" id="newName" placeholder="Item Name">
+      <input type="text" id="newWeight" placeholder="Weight (e.g., 2kg)">
+      <input type="text" id="newCategory" placeholder="Category">
+      <input type="text" id="newMethod" placeholder="Disposal Method">
+      <button onclick="addItem()">Add Item</button>
+      <button onclick="showData()">Show Data</button>
+    </div>
+  </div>
+
+  <script>
+    // Add new item to database
+    function addItem() {
+      const type = document.getElementById("newName").value.trim();
+      const weight = document.getElementById("newWeight").value.trim();
+      const category = document.getElementById("newCategory").value.trim();
+      const method = document.getElementById("newMethod").value.trim();
+
+      if (!type || !weight || !category || !method) {
+        alert("Please fill all fields!");
+        return;
+      }
+
+      fetch("http://localhost:8080/api/waste", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type, weight, category, method })
+      })
+        .then(res => res.json())
+        .then(data => {
+          console.log("✅ Added:", data);
+          alert("Waste item added successfully!");
+          showData();
+        })
+        .catch(err => console.error("❌ Error:", err));
+    }
+
+    // Show all data from database
+    function showData() {
+      fetch("http://localhost:8080/api/waste")
+        .then(res => res.json())
+        .then(data => {
+          let table = `<table>
+            <tr><th>ID</th><th>Type</th><th>Weight</th><th>Category</th><th>Method</th></tr>`;
+          data.forEach(item => {
+            table += `<tr>
+              <td>${item.id}</td>
+              <td>${item.type}</td>
+              <td>${item.weight}</td>
+              <td>${item.category}</td>
+              <td>${item.method}</td>
+            </tr>`;
+          });
+          table += "</table>";
+          document.getElementById("output").innerHTML = table;
+        })
+        .catch(err => console.error("❌ Error fetching data:", err));
+    }
+
+    function searchItem() {
+      const input = document.getElementById("inputItem").value.trim().toLowerCase();
+      fetch("http://localhost:8080/api/waste")
+        .then(res => res.json())
+        .then(data => {
+          const found = data.find(item => item.type.toLowerCase() === input);
+          const output = document.getElementById("output");
+          if (found) {
+            output.innerHTML = `<b>Item:</b> ${found.type}<br>
+                                <b>Category:</b> ${found.category}<br>
+                                <b>Disposal Method:</b> ${found.method}`;
+          } else {
+            output.innerHTML = "Item not found. Add it below!";
+          }
+        });
+    }
+  </script>
+</body>
+</html>
+
